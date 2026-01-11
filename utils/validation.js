@@ -10,4 +10,5 @@ const validateSignupData = (req) => {
   } else if (!validator.isEmail(email)) {
     throw new Error("Email is Invalid.");
   }
-}
+};
+module.exports = { validateSignupData };
