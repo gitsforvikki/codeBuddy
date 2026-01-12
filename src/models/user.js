@@ -24,8 +24,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       required: [true, "Email is required"],
       trim: true,
-      unique: true,
-      index: true,
+      unique: true, //this will do indexing as like index:true
       // match: [
       //   /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       //   "Please enter a valid email address",

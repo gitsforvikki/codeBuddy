@@ -4,6 +4,7 @@ const { connectDB } = require("./config/database");
 const authRouter = require("../routes/auth");
 const profileRouter = require("../routes/profile");
 const userRouter = require("../routes/user");
+const connectionRequestRouter = require("../routes/request");
 
 /**
  *  Allow our express server to understant the json data-> this express.json() middleware convert
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/profile", profileRouter);
+app.use("/request", connectionRequestRouter);
 
 //DB connection
 connectDB()
