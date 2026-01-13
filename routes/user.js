@@ -1,8 +1,64 @@
 const express = require("express");
 const User = require("../src/models/user");
 const { authUser } = require("../middlewares/auth");
+const ConnectionRequest = require("../src/models/connectionRequest");
 
 const userRouter = express.Router();
+
+const USER_SAFE_INFO = ["firstName", "lastName", "age", "about", "skills"];
+
+// GET-> /user/request/pending
+userRouter.get("/requests/pending", authUser, async (req, res) => {
+  try {
+    // find the loggedin user
+    const loggedInUser = req.user;
+    //find the active requests
+    const pendingConnectionRequests = await ConnectionRequest.find({
+      toUserId: loggedInUser._id,
+      status: "interested",
+    }).populate("fromUserId", USER_SAFE_INFO);
+
+    if (pendingConnectionRequests.length === 0) {
+      return res.status(404).json({ message: "Pending request not found." });
+    }
+
+    res.send(pendingConnectionRequests);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("ERROR: " + err.message);
+  }
+});
+
+//GET-> /user/connections
+userRouter.get("/connections", authUser, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const connections = await ConnectionRequest.find({
+      $or: [
+        { toUserId: loggedInUser._id, status: "accepted" },
+        { fromUserId: loggedInUser._id, status: "accepted" },
+      ],
+    })
+      .populate("fromUserId", USER_SAFE_INFO)
+      .populate("toUserId", USER_SAFE_INFO);
+
+    if (connections.length === 0) {
+      return res.status(404).send("Connections not found.");
+    }
+    const connectedPrifles = connections?.map((e) => {
+      if (e.fromUserId._id.toString() === loggedInUser._id.toString()) {
+        return e.toUserId;
+      }
+      return e.fromUserId;
+    });
+    res.send(connectedPrifles);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("ERROR: " + err.message);
+  }
+});
+
+
 
 //get user by id
 userRouter.get("/me", authUser, async (req, res) => {
