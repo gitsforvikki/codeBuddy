@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../src/models/user");
 const { authUser } = require("../middlewares/auth");
 const ConnectionRequest = require("../src/models/connectionRequest");
+const { connection } = require("mongoose");
 
 const userRouter = express.Router();
 
@@ -58,7 +59,39 @@ userRouter.get("/connections", authUser, async (req, res) => {
   }
 });
 
+//Feed api
+userRouter.get("/feed", authUser, async (req, res) => {
+  try {
 
+    const loggedInUser = req.user;
+    //find out all connection documents where i am either a connecton sender or receiver
+    const connections = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select("fromUserId toUserId");
+
+    const hiddeUserFromFeed = new Set();
+    connections.forEach((each) => {
+      hiddeUserFromFeed.add(each.fromUserId.toString());
+      hiddeUserFromFeed.add(each.toUserId.toString());
+    });
+    //getting all profiles except connections(interested, rejected, accepted,ignored ) and user itself
+    const servedFeed = await User.find({
+      $and: [
+        {
+          _id: { $nin: Array.from(hiddeUserFromFeed) },
+        },
+        {
+          _id: { $ne: loggedInUser._id },
+        },
+      ],
+    }).select(USER_SAFE_INFO);
+
+    res.send(servedFeed);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("ERROR: " + err.message);
+  }
+});
 
 //get user by id
 userRouter.get("/me", authUser, async (req, res) => {
