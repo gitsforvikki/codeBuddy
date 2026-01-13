@@ -48,7 +48,7 @@ authRouter.post("/login", async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
-      res.status(200).send("Login success!");
+      res.status(200).send(user);
     } else {
       throw new Error("Invalid user!");
     }
