@@ -62,6 +62,10 @@ userRouter.get("/connections", authUser, async (req, res) => {
 //Feed api
 userRouter.get("/feed", authUser, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    limit = limit > 40 ? 10 : limit;
+    const skip = (page - 1) * limit;
     const loggedInUser = req.user;
     //find out all connection documents where i am either a connecton sender or receiver
     const connections = await ConnectionRequest.find({
@@ -83,7 +87,10 @@ userRouter.get("/feed", authUser, async (req, res) => {
           _id: { $ne: loggedInUser._id },
         },
       ],
-    }).select(USER_SAFE_INFO);
+    })
+      .select(USER_SAFE_INFO)
+      .skip(skip)
+      .limit(limit);
 
     res.send(servedFeed);
   } catch (err) {
