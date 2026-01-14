@@ -28,7 +28,6 @@ profileRouter.patch("/update", authUser, async (req, res) => {
       "photoUrl",
       "about",
       "skills",
-      "email",
     ];
 
     const isAllowed = Object.keys(data).every((k) =>
@@ -40,10 +39,10 @@ profileRouter.patch("/update", authUser, async (req, res) => {
     }
 
     const updatedUser = await User.findByIdAndUpdate({ _id: userId }, data, {
-      returnreturnDocument: "after",
+      returnDocument: "after",
       runValidators: true, // Allow custome validator run on update user as well
     });
-    res.send("User update successfully!");
+    res.send(updatedUser);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Unexpected Error Occured!" + err.message);

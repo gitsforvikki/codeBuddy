@@ -6,7 +6,15 @@ const { connection } = require("mongoose");
 
 const userRouter = express.Router();
 
-const USER_SAFE_INFO = ["firstName", "lastName", "age", "about", "skills"];
+const USER_SAFE_INFO = [
+  "firstName",
+  "lastName",
+  "age",
+  "about",
+  "skills",
+  "photoUrl",
+  "gender"
+];
 
 // GET-> /user/request/pending
 userRouter.get("/requests/pending", authUser, async (req, res) => {
