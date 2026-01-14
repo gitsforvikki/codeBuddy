@@ -2,26 +2,32 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const { authUser } = require("../middlewares/auth");
 const User = require("../src/models/user");
+const AppError = require("../utils/AppError");
 const profileRouter = express.Router();
 
 //view profile
-profileRouter.get("/view", authUser, async (req, res) => {
+profileRouter.get("/view", authUser, async (req, res, next) => {
   try {
     const user = req.user;
-    res.send(user);
+
+    if (!user) {
+      return next(new AppError("User not found", 404));
+    }
+    res.status(200).json({
+      success: true,
+      message: "Profile fetched successfully",
+      data: user,
+    });
   } catch (error) {
-    console.error("Error", error.message);
-    res.status(500).send("ERROR: " + error.message);
+    next(error); // delegate to global error handler
   }
 });
-
-// udpate profile
-profileRouter.patch("/update", authUser, async (req, res) => {
-  const userId = req.user._id;
-  const data = req.body;
-
+// update profile
+profileRouter.patch("/update", authUser, async (req, res, next) => {
   try {
-    //only below fields are allowd for update
+    const userId = req.user._id;
+    const data = req.body;
+
     const FIELDS_ALLOWED_FOR_UPDATE = [
       "age",
       "gender",
@@ -30,22 +36,32 @@ profileRouter.patch("/update", authUser, async (req, res) => {
       "skills",
     ];
 
-    const isAllowed = Object.keys(data).every((k) =>
-      FIELDS_ALLOWED_FOR_UPDATE.includes(k)
+    const isAllowed = Object.keys(data).every((field) =>
+      FIELDS_ALLOWED_FOR_UPDATE.includes(field)
     );
 
     if (!isAllowed) {
-      throw new Error("Update not allowed.");
+      return next(
+        new AppError("first name & last name are not allowed to update", 400)
+      );
     }
 
-    const updatedUser = await User.findByIdAndUpdate({ _id: userId }, data, {
-      returnDocument: "after",
-      runValidators: true, // Allow custome validator run on update user as well
+    const updatedUser = await User.findByIdAndUpdate(userId, data, {
+      new: true,
+      runValidators: true,
     });
-    res.send(updatedUser);
+
+    if (!updatedUser) {
+      return next(new AppError("User not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Unexpected Error Occured!" + err.message);
+    next(err); // forward to global error handler
   }
 });
 

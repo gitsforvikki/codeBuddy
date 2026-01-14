@@ -6,6 +6,7 @@ const authRouter = require("../routes/auth");
 const profileRouter = require("../routes/profile");
 const userRouter = require("../routes/user");
 const connectionRequestRouter = require("../routes/request");
+const ErrorHandler = require("../middlewares/ErrorHandler");
 
 /**
  *  Allow our express server to understant the json data-> this express.json() middleware convert
@@ -28,7 +29,7 @@ app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/request", connectionRequestRouter);
-
+app.use(ErrorHandler);
 //DB connection
 connectDB()
   .then(() => {
