@@ -2,7 +2,10 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../src/models/user");
 const { validateSignupData } = require("../utils/validation");
+const { authUser } = require("../middlewares/auth");
+
 const authRouter = express.Router();
+
 authRouter.post("/signup", async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   try {
@@ -69,4 +72,31 @@ authRouter.post("/logout", async (req, res) => {
     res.status(500).send("ERROR: " + error.message);
   }
 });
+
+//reset password(for logged in user) - this is not same as forgot password(for logged out user who forgot own password)
+authRouter.patch("/reset-password", authUser, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    //take old password, newpassword
+    const { oldPassword, newPassword } = req.body;
+
+    //verify the old password
+    const isValid = await loggedInUser.validateUser(oldPassword);
+    if (!isValid) {
+      return res.status(400).json({ message: "Invalid credentials." });
+    }
+    const newHashPassword = await bcrypt.hash(newPassword, 10);
+
+    //if true --> decrpt the new pass and save
+    loggedInUser.password = newHashPassword;
+    await loggedInUser.save();
+    res.send({ message: "Password update successfully." });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Unexpected Error Occured!" + err.message);
+  }
+});
+
+//forgot password
+// ------TODO---------
 module.exports = authRouter;

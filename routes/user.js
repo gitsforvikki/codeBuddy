@@ -2,7 +2,6 @@ const express = require("express");
 const User = require("../src/models/user");
 const { authUser } = require("../middlewares/auth");
 const ConnectionRequest = require("../src/models/connectionRequest");
-const { connection } = require("mongoose");
 
 const userRouter = express.Router();
 
@@ -13,7 +12,7 @@ const USER_SAFE_INFO = [
   "about",
   "skills",
   "photoUrl",
-  "gender"
+  "gender",
 ];
 
 // GET-> /user/request/pending
@@ -27,9 +26,9 @@ userRouter.get("/requests/pending", authUser, async (req, res) => {
       status: "interested",
     }).populate("fromUserId", USER_SAFE_INFO);
 
-    if (pendingConnectionRequests.length === 0) {
-      return res.status(404).json({ message: "Pending request not found." });
-    }
+    // if (pendingConnectionRequests.length === 0) {
+    //   return res.status(404).json({ message: "Pending request not found." });
+    // }
 
     res.send(pendingConnectionRequests);
   } catch (err) {
@@ -100,7 +99,11 @@ userRouter.get("/feed", authUser, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.send(servedFeed);
+    res.status(200).json({
+      success: true,
+      message: "Feed get successfully",
+      data: servedFeed,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("ERROR: " + err.message);

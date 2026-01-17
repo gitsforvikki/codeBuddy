@@ -94,13 +94,16 @@ connectionRequestRouter.post(
       //udpate the status
       activeConnectionRequest.status = status;
       const updatedConnection = await activeConnectionRequest.save();
-      res.send({ message: `Connection request ${status}`, updatedConnection });
+      res.status(200).json({
+        success: true,
+        message: `Connection request ${status}`,
+        data: updatedConnection,
+      });
     } catch (err) {
       console.error(err);
       res.status(500).send("ERROR: " + err.message);
     }
   }
 );
-
 
 module.exports = connectionRequestRouter;
