@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -7,7 +8,6 @@ const profileRouter = require("../routes/profile");
 const userRouter = require("../routes/user");
 const connectionRequestRouter = require("../routes/request");
 const ErrorHandler = require("../middlewares/ErrorHandler");
-
 /**
  *  Allow our express server to understant the json data-> this express.json() middleware convert
  *  the json received from client to javascript object
@@ -17,9 +17,9 @@ const ErrorHandler = require("../middlewares/ErrorHandler");
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.LOCAL_HOST,
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -30,12 +30,15 @@ app.use("/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/request", connectionRequestRouter);
 app.use(ErrorHandler);
-//DB connection
+
+// DB + Server start
+const PORT = process.env.PORT || 3000;
+
 connectDB()
   .then(() => {
     console.log("mongoDB connection establised.....");
-    app.listen(3000, () => {
-      console.log("Server listening at port:3000");
+    app.listen(PORT, () => {
+      console.log("Server listening at port:" + PORT);
     });
   })
   .catch((error) => console.error("mongoDB connection failed"));

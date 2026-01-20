@@ -93,7 +93,7 @@ const userSchema = new mongoose.Schema(
 //these are the mongoose schema mothods:- these are works like helper functions
 userSchema.methods.getJWT = async function () {
   const user = this;
-  const token = await jwt.sign({ _id: user._id }, "key#@failAUth982791", {
+  const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET , {
     expiresIn: "1d",
   });
   return token;
