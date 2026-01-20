@@ -17,7 +17,7 @@ const ErrorHandler = require("../middlewares/ErrorHandler");
 const app = express();
 app.use(
   cors({
-    origin: process.env.LOCAL_HOST,
+    origin: [process.env.LOCAL_HOST, process.env.FRONTEND_URL],
     credentials: true,
   }),
 );
