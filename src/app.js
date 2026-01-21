@@ -16,6 +16,7 @@ const emailRouter = require("../routes/email");
  * this cookieParser used for allow the server to read the cookie
  */
 const app = express();
+require("../utils/cronJob");
 app.use(
   cors({
     origin: [process.env.LOCAL_HOST, process.env.FRONTEND_URL],
