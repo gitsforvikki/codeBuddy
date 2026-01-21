@@ -4,6 +4,7 @@ const connectionRequestRouter = express.Router();
 const { authUser } = require("../middlewares/auth");
 const ConnectionRequest = require("../src/models/connectionRequest");
 const User = require("../src/models/user");
+const { sendEmail } = require("../utils/mailer");
 
 connectionRequestRouter.post(
   "/send/:status/:toUserId",
@@ -14,6 +15,7 @@ connectionRequestRouter.post(
       const fromUserId = req.user._id;
       const status = req.params.status;
       const user = await User.findById(toUserId);
+      const loggedInuser = req.user;
 
       const ALLOWED_STATUS_TYPE = ["interested", "ignored"];
       if (!ALLOWED_STATUS_TYPE.includes(status)) {
@@ -50,6 +52,20 @@ connectionRequestRouter.post(
       });
 
       const data = await newConnectionRequest.save();
+      await sendEmail(
+        toUserExist.email,
+        "New Connection Request on CodeBuddy",
+        `
+        <h2>Hello ${toUserExist.firstName} 👋</h2>
+        <p>You have received a new connection request from <strong>${loggedInuser.firstName}</strong>.</p>
+        <p>Log in to your account to accept or reject it.</p>
+        <br/>
+        <a href="https://codebuddydev.vercel.app">
+          Go to CodeBuddy
+        </a>
+      `,
+      );
+
       res.json({
         message: `You ${status} for ${user?.firstName}`,
         data,
@@ -58,7 +74,7 @@ connectionRequestRouter.post(
       console.error(err);
       res.status(500).send("ERROR: " + err.message);
     }
-  }
+  },
 );
 
 //accept or reject the connection request
@@ -103,7 +119,7 @@ connectionRequestRouter.post(
       console.error(err);
       res.status(500).send("ERROR: " + err.message);
     }
-  }
+  },
 );
 
 module.exports = connectionRequestRouter;
