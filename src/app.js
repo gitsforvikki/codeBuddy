@@ -8,6 +8,7 @@ const profileRouter = require("../routes/profile");
 const userRouter = require("../routes/user");
 const connectionRequestRouter = require("../routes/request");
 const ErrorHandler = require("../middlewares/ErrorHandler");
+const emailRouter = require("../routes/email");
 /**
  *  Allow our express server to understant the json data-> this express.json() middleware convert
  *  the json received from client to javascript object
@@ -29,6 +30,7 @@ app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/request", connectionRequestRouter);
+app.use("/email", emailRouter);
 app.use(ErrorHandler);
 
 // DB + Server start
