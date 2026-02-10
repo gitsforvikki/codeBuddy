@@ -54,7 +54,7 @@ userRouter.get("/connections", authUser, async (req, res) => {
       return res.status(404).send("Connections not found.");
     }
     const connectedPrifles = connections?.map((e) => {
-      if (e.fromUserId._id.toString() === loggedInUser._id.toString()) {
+      if (e.fromUserId?._id.toString() === loggedInUser._id.toString()) {
         return e.toUserId;
       }
       return e.fromUserId;
