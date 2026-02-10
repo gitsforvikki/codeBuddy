@@ -9,6 +9,12 @@ const userRouter = require("../routes/user");
 const connectionRequestRouter = require("../routes/request");
 const ErrorHandler = require("../middlewares/ErrorHandler");
 const emailRouter = require("../routes/email");
+const http = require("http");
+const { initializeSocket } = require("../utils/socket");
+const { chatRouter } = require("../routes/ChatRoutes");
+const paymentRouter = require("../routes/payment");
+const webhookRouter = require("../routes/razorpayWebHook");
+
 /**
  *  Allow our express server to understant the json data-> this express.json() middleware convert
  *  the json received from client to javascript object
@@ -23,6 +29,13 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(
+  "/api/webhook/razorpay",
+  express.raw({ type: "application/json" }),
+  webhookRouter,
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -32,15 +45,21 @@ app.use("/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/request", connectionRequestRouter);
 app.use("/email", emailRouter);
+app.use("/chat", chatRouter);
+app.use("/payment", paymentRouter);
 app.use(ErrorHandler);
 
 // DB + Server start
 const PORT = process.env.PORT || 3000;
 
+//scket setup
+const server = http.createServer(app);
+initializeSocket(server);
+
 connectDB()
   .then(() => {
     console.log("mongoDB connection establised.....");
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log("Server listening at port:" + PORT);
     });
   })
