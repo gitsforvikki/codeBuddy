@@ -75,7 +75,13 @@ const initializeSocket = (server) => {
 
           await chat.save();
 
-          io.to(roomId).emit("messageReceived", { firstName, lastName, text }); // ✅ normalized name
+          io.to(roomId).emit("messageReceived", {
+            firstName,
+            lastName,
+            text,
+            senderId: loggedInUserId,
+            createdAt: new Date().toISOString(),
+          }); // ✅ normalized name with timestamp and senderId
         } catch (err) {
           console.error(err);
         }
