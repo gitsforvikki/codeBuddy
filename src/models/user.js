@@ -62,6 +62,15 @@ const userSchema = new mongoose.Schema(
     },
     membershipType: {
       type: String,
+      default: "normal",
+    },
+    role: {
+      type: String,
+      enum: {
+        values: ["user", "admin"],
+        message: `{VALUE} is not a valid role`,
+      },
+      default: "user",
     },
     photoUrl: {
       type: String,

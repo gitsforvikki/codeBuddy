@@ -13,6 +13,9 @@ const USER_SAFE_INFO = [
   "skills",
   "photoUrl",
   "gender",
+  "isPremium",
+  "membershipType",
+  "role",
 ];
 
 // GET-> /user/request/pending
@@ -53,13 +56,13 @@ userRouter.get("/connections", authUser, async (req, res) => {
     if (connections.length === 0) {
       return res.status(404).send("Connections not found.");
     }
-    const connectedPrifles = connections?.map((e) => {
+    const connectedProfiles = connections?.map((e) => {
       if (e.fromUserId?._id.toString() === loggedInUser._id.toString()) {
         return e.toUserId;
       }
       return e.fromUserId;
     });
-    res.send(connectedPrifles);
+    res.send(connectedProfiles);
   } catch (err) {
     console.error(err);
     res.status(500).send("ERROR: " + err.message);

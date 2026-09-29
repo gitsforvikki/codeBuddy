@@ -11,6 +11,13 @@ authRouter.post("/signup", async (req, res) => {
   try {
     //validate user data
     validateSignupData(req);
+
+    //check if user already exist
+    const existUser = await User.find({email: email});
+    if (existUser.length > 0) {
+      throw new Error("User already registered.");
+    }
+
     //encrypt password
     const passwordHash = await bcrypt.hash(password, 10); //salt 10 round
     const newUser = new User({
@@ -39,6 +46,7 @@ authRouter.post("/login", async (req, res) => {
 
     //compare the password
     const isValid = await user.validateUser(password);
+
     if (isValid) {
       //if user is valid then generate token
       const token = await user.getJWT();
@@ -46,8 +54,8 @@ authRouter.post("/login", async (req, res) => {
       //attach the token with cookie and send back to the client
       res.cookie("token", token, {
         httpOnly: true, // JS cannot access it (XSS safe)
-        secure: true, // HTTPS only
-        sameSite: "none", // CSRF protection
+        secure: true, // HTTPS only, not sent over HTTP (MITM safe)
+        sameSite: "none", // Allow cross-site cookie sending
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
